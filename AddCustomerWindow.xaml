@@ -1,0 +1,25 @@
+﻿<Window x:Class="AppRita_WPF.AddCustomerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Voeg Klant Toe" Height="200" Width="300">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid Margin="50,30,50,0" VerticalAlignment="Top">
+            <TextBox x:Name="NameTextBox" Width="200" Height="30"/>
+            <TextBlock Text="Naam" Foreground="Gray" IsHitTestVisible="False" 
+                       VerticalAlignment="Center" Margin="5,0,0,0"
+                       Visibility="{Binding Text.IsEmpty, ElementName=NameTextBox, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </Grid>
+
+        <Grid Margin="50,80,50,0" VerticalAlignment="Top">
+            <TextBox x:Name="PhoneTextBox" Width="200" Height="30"/>
+            <TextBlock Text="Telefoon" Foreground="Gray" IsHitTestVisible="False" 
+                       VerticalAlignment="Center" Margin="5,0,0,0"
+                       Visibility="{Binding Text.IsEmpty, ElementName=PhoneTextBox, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </Grid>
+        <Button Content="Opslaan" Width="100" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Center" Click="SaveCustomer_Click"/>
+    </Grid>
+</Window>

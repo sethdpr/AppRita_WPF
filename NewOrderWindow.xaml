@@ -1,0 +1,22 @@
+﻿<Window x:Class="AppRita_WPF.NewOrderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nieuwe Bestelling" Height="300" Width="400">
+    <Grid>
+        <StackPanel Margin="20">
+            <TextBlock Text="Bestellingsnaam:" FontWeight="Bold"/>
+            <TextBox x:Name="OrderNameTextBox" Margin="0,0,0,10" Width="200"/>
+
+            <TextBlock Text="Product 1:" FontWeight="Bold"/>
+            <TextBox x:Name="Product1QuantityTextBox" Margin="0,0,0,10" Width="200"/>
+
+            <TextBlock Text="Product 2:" FontWeight="Bold"/>
+            <TextBox x:Name="Product2QuantityTextBox" Margin="0,0,0,10" Width="200"/>
+
+            <TextBlock Text="Product 3:" FontWeight="Bold"/>
+            <TextBox x:Name="Product3QuantityTextBox" Margin="0,0,0,10" Width="200"/>
+
+            <Button Content="Opslaan" Width="100" Height="30" Click="SaveOrder_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
