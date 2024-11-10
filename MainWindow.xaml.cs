@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static AppRita_WPF.MainWindow;
 
 namespace AppRita_WPF
 {
@@ -23,20 +26,30 @@ namespace AppRita_WPF
 
         public class Customer
         {
+            [Key]
             public int Id { get; set; }
             public string Name { get; set; }
-            public string PhoneNumber { get; set; }
+            public string PhoneNumber { get; set; } //Toch een kleine garantie dat mensen niet weggaan zonder te betalen
 
             public ICollection<Order> Orders { get; set; }
         }
 
         public class Order
         {
+            [Key]
             public int Id { get; set; }
             public string OrderName { get; set; }
+            public int CustomerId { get; set; }
             public Customer Customer { get; set; }
-            public bool IsCompleted { get; set; }
             public DateTime OrderDate { get; set; }
+            [NotMapped]
+            public decimal TotalPrice
+            {
+                get
+                {
+                    return OrderProducts?.Sum(op => op.Quantity * op.Price) ?? 0;
+                }
+            }
 
             public ICollection<OrderProduct> OrderProducts { get; set; }
 
@@ -48,6 +61,7 @@ namespace AppRita_WPF
 
         public class OrderProduct
         {
+            [Key]
             public int Id { get; set; }
             public Order Order { get; set; }
             public string ProductName { get; set; }
@@ -103,6 +117,22 @@ namespace AppRita_WPF
             {
                 CustomerWindow customerWindow = new CustomerWindow(selectedCustomer);
                 customerWindow.Show();
+            }
+        }
+        private void DeleteCustomer_Click(object sender, RoutedEventArgs e)
+        {
+            if (CustomerListBox.SelectedItem is Customer selectedCustomer)
+            {
+                using (var context = new CafeContext())
+                {
+                    context.Customers.Remove(selectedCustomer);
+                    context.SaveChanges();
+                    LoadCustomers();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Selecteer een klant om te verwijderen.");
             }
         }
     }

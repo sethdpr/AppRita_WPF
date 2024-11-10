@@ -4,6 +4,7 @@ using AppRita_WPF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppRita_WPF.Migrations
 {
     [DbContext(typeof(MainWindow.CafeContext))]
-    partial class CafeContextModelSnapshot : ModelSnapshot
+    [Migration("20241104170138_RemoveIsCompletedFromOrders")]
+    partial class RemoveIsCompletedFromOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

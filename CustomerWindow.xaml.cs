@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +28,7 @@ namespace AppRita_WPF
             this.customer = customer;
             CustomerNameTextBlock.Text = customer.Name;
             CustomerPhoneTextBlock.Text = customer.PhoneNumber;
+            LoadOrders(customer.Id);
         }
 
         private void LoadOrders(int customerId)
@@ -33,12 +36,14 @@ namespace AppRita_WPF
             using (var context = new CafeContext())
             {
                 var orders = context.Orders
-                    .Where(o => o.Id == customerId)
+                    .Where(o => o.CustomerId == customerId)
+                    .Include(o => o.OrderProducts)
                     .ToList();
 
                 OrderListBox.ItemsSource = orders;
             }
         }
+
 
         private void NewOrder_Click(object sender, RoutedEventArgs e)
         {
@@ -48,39 +53,70 @@ namespace AppRita_WPF
             {
                 using (var context = new CafeContext())
                 {
+                    var existingCustomer = context.Customers.Find(customer.Id);
+                    if (existingCustomer == null)
+                    {
+                        MessageBox.Show("De geselecteerde klant bestaat niet in de database.");
+                        return;
+                    }
+
                     var newOrder = new Order
                     {
-                        Id = customer.Id,
+                        CustomerId = customer.Id,
                         OrderName = newOrderWindow.OrderName,
                         OrderDate = DateTime.Now,
-                        IsCompleted = false,
+                        OrderProducts = newOrderWindow.OrderProducts
                     };
 
                     context.Orders.Add(newOrder);
-                    context.SaveChanges();
-
-                    foreach (var product in newOrderWindow.OrderProducts)
-                    {
-                        product.Id = newOrder.Id;
-                        context.OrderProducts.Add(product);
-                    }
-
                     context.SaveChanges();
 
                     LoadOrders(customer.Id);
                 }
             }
         }
-
-        private void DeleteCustomer_Click(object sender, RoutedEventArgs e)
+        private void OrderListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-                using (var context = new CafeContext())
+            if (OrderListBox.SelectedItem == null)
+            {
+                MessageBox.Show("Geen bestelling geselecteerd.");
+                return;
+            }
+
+            if (OrderListBox.SelectedItem is Order selectedOrder)
+            {
+                NewOrderWindow newOrderWindow = new NewOrderWindow();
+
+                newOrderWindow.OrderName = selectedOrder.OrderName;
+                newOrderWindow.OrderProducts = selectedOrder.OrderProducts.ToList();
+
+                if (newOrderWindow.ShowDialog() == true)
                 {
-                    context.Customers.Remove(customer);
-                    context.SaveChanges();
-                    LoadCustomers();
-                    OrderListBox.ItemsSource = null;
+                    using (var context = new CafeContext())
+                    {
+                        var orderToUpdate = context.Orders
+                            .Include(o => o.OrderProducts)
+                            .FirstOrDefault(o => o.Id == selectedOrder.Id);
+
+                        if (orderToUpdate != null)
+                        {
+                            orderToUpdate.OrderName = newOrderWindow.OrderName;
+                            orderToUpdate.OrderProducts = newOrderWindow.OrderProducts;
+
+                            context.SaveChanges();
+                            LoadOrders(orderToUpdate.CustomerId);
+                        }
+                        else
+                        {
+                            MessageBox.Show("De geselecteerde bestelling kon niet worden gevonden in de database.");
+                        }
+                    }
                 }
+            }
+            else
+            {
+                MessageBox.Show("Het geselecteerde item is geen bestelling.");
+            }
         }
 
         private void DeleteOrder_Click(object sender, RoutedEventArgs e)
@@ -89,7 +125,12 @@ namespace AppRita_WPF
             {
                 using (var context = new CafeContext())
                 {
-                    context.Orders.Remove(selectedOrder);
+                    var orderToRemove = context.Orders.Find(selectedOrder.Id);
+                    if (orderToRemove != null)
+                    {
+                        context.Orders.Remove(orderToRemove);
+                        context.SaveChanges();
+                    }
                     context.SaveChanges();
                     LoadOrders(customer.Id);
                 }
@@ -99,7 +140,6 @@ namespace AppRita_WPF
                 MessageBox.Show("Selecteer een bestelling om te verwijderen.");
             }
         }
-
         private void LoadCustomers()
         {
             using (var context = new CafeContext())
